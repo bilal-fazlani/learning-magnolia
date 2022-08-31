@@ -11,9 +11,12 @@ case class Animal(
     category: Category,
     breed: Option[String],
     domestic: Option[Boolean],
-    tags: List[String]
+    tags2: List[List[Category]],
+    tags3: List[List[String]],
+    tags4: List[String],
+    tags5: List[List[List[Category]]],
 ) derives PactGen
 
 @main def hello(): Unit =
-  val pact = summon[PactGen[Animal]].generatePactBody()
+  val pact = PactGen[List[String]].generatePactBody()
   println(pact)
