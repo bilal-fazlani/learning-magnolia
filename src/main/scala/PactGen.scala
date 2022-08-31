@@ -29,6 +29,7 @@ object PactGen extends CustomDerivation[PactGen] {
         case obj: PactDslJsonBody => obj.stringValue(name, ctx.typeInfo.short)
         case arr: PactDslJsonArray => ??? //todo: add support for array of sums
       }
+      parent
 
   override def join[T](ctx: CaseClass[PactGen, T]): PactGen[T] = {
     case (Some(parent), Some(name)) => caseClass(parent, name)(ctx)
