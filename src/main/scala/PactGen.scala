@@ -8,18 +8,27 @@ trait PactGen[T]:
       name: Option[String] = None
   ): DslPart
 
-object PactGen extends AutoDerivation[PactGen] {
+  def widen[A >: T]: PactGen[A] = this.asInstanceOf[PactGen[A]]
+
+object PactGen extends CustomDerivation[PactGen] {
   def apply[T: PactGen]: PactGen[T] = summon[PactGen[T]]
 
   private def caseClass[T](parent: DslPart, name: String)(
       ctx: CaseClass[PactGen, T]
   ) =
-    val nested = parent.`object`(name)
-    ctx.params.foreach { param =>
-      param.typeclass.generatePactBody(Some(nested), Some(param.label))
-    }
-    nested.closeObject()
-    nested
+    val isObj = ctx.isObject || ctx.params.isEmpty
+    if !isObj then
+      val nested = parent.`object`(name)
+      ctx.params.foreach { param =>
+        param.typeclass.generatePactBody(Some(nested), Some(param.label))
+      }
+      nested.closeObject()
+      nested
+    else 
+      parent match {
+        case obj: PactDslJsonBody => obj.stringValue(name, ctx.typeInfo.short)
+        case arr: PactDslJsonArray => ??? //todo: add support for array of sums
+      }
 
   override def join[T](ctx: CaseClass[PactGen, T]): PactGen[T] = {
     case (Some(parent), Some(name)) => caseClass(parent, name)(ctx)
@@ -28,9 +37,8 @@ object PactGen extends AutoDerivation[PactGen] {
   }
 
   override def split[T](ctx: SealedTrait[PactGen, T]): PactGen[T] =
-    throw new IllegalArgumentException(
-      "Sealed traits are not supported. please use instance based pact generation"
-    )
+    //this is not required since we never automatically chose which case to use
+    (_, _) => ??? // unreachable code
 
   // int pact
   given PactGen[Int] = {
