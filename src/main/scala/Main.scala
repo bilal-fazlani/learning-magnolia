@@ -1,17 +1,19 @@
-enum Tree[+T] derives PrettyPrint:
-  case Branch(left: Tree[T], right: Tree[T])
-  case Leaf(value: T)
+import au.com.dius.pact.consumer.dsl.PactDslJsonBody
+
+case class Category(
+  label: String,
+  id: String,
+)
 
 case class Animal(
     name: String,
     age: Int,
+    category: Category,
     breed: Option[String],
-    demestic: Option[Boolean],
+    domestic: Option[Boolean],
     tags: List[String]
-) derives PrettyPrint
+) derives PactGen
 
 @main def hello(): Unit =
-  val animal = Animal("cat", 2, Some("normal"), None, List("cat", "pet", "brown")).print
-  val en = Tree.Branch(Tree.Leaf(1), Tree.Leaf(2)).print
-  println(animal)
-  println(en)
+  val pact = summon[PactGen[Animal]].generatePactBody()
+  println(pact)

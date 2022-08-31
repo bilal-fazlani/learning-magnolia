@@ -11,5 +11,6 @@ lazy val root = project
     libraryDependencies ++= Seq(
       Libs.magnolia,
       Libs.rainbowcli,
+      Libs.pactJvm,
     )
   )
